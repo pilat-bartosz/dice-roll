@@ -8,6 +8,12 @@ using Random = UnityEngine.Random;
 //TODO add drag and release
 namespace DiceRoll
 {
+    public enum DiceState
+    {
+        PickedUp,
+        SettleDown
+    }
+    
     public class Dice : MonoBehaviour
     {
         private Rigidbody _rigidbody;
@@ -15,9 +21,10 @@ namespace DiceRoll
         [SerializeField] private List<TMPFace> _faces;
 
         private bool _itWasThrown;
+        
+        public Action<DiceState> OnStateChange;
 
-
-        private void Start()
+        private void Awake()
         {
             Assert.IsNotNull(_faces, "shouldn't be null");
             Assert.IsTrue(_faces.Count > 0, "Dice should have faces");
@@ -25,20 +32,24 @@ namespace DiceRoll
             _rigidbody = GetComponent<Rigidbody>();
 
             Assert.IsNotNull(_rigidbody, "shouldn't be null");
+        }
 
-            _itWasThrown = true;
-
-            //TODO remove/change
-            _rigidbody.rotation = Random.rotation;
+        private void Start()
+        {
+            //auto roll 
+            AutoRoll();
         }
 
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                AutoRoll();
+            }
             if (_itWasThrown && _rigidbody.IsSleeping())
             {
                 _itWasThrown = false;
-
-                Debug.Log(_rigidbody.IsSleeping() + CheckValue().ToString());
+                OnStateChange?.Invoke(DiceState.SettleDown);
             }
         }
 
@@ -47,7 +58,7 @@ namespace DiceRoll
         /// Returns a value of the face that "face up" the best.
         /// </summary>
         /// <returns>Value of the face</returns>
-        private int CheckValue()
+        public int CheckValue()
         {
             var value = 0;
             var bestMatch = float.MinValue;
@@ -65,6 +76,20 @@ namespace DiceRoll
             }
 
             return value;
+        }
+
+        //TODO remove
+        private void OnMouseDown()
+        {
+            AutoRoll();
+        }
+
+        private void AutoRoll()
+        {
+            OnStateChange?.Invoke(DiceState.PickedUp);
+            _itWasThrown = true;
+            _rigidbody.AddForce(Vector3.up, ForceMode.Impulse);
+            _rigidbody.AddTorque(Random.onUnitSphere*10);
         }
     }
 }
