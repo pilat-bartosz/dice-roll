@@ -11,6 +11,8 @@ namespace _dice_roll
     /// <summary>
     /// Dummy class to manage everything
     /// TODO add proper manager for handling multiple dices
+    /// TODO move input to it's own manager
+    /// TODO add interactable as a interface?
     /// </summary>
     public class RollManager : MonoBehaviour
     {
