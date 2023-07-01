@@ -4,10 +4,10 @@ using Random = UnityEngine.Random;
 
 //TODO split into Dice and Rigidbody dice
 //TODO add drag and release
-namespace _dice_roll.Dice
+namespace _dice_roll.Die
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class RigidbodyDice : Dice
+    public class RigidbodyDie : Die
     {
         private Rigidbody _rigidbody;
 
@@ -26,9 +26,9 @@ namespace _dice_roll.Dice
 
         private void Update()
         {
-            if (CurrentState == DiceState.Thrown && _rigidbody.IsSleeping())
+            if (CurrentState == DieState.Thrown && _rigidbody.IsSleeping())
             {
-                ChangeState(DiceState.SettleDown);
+                ChangeState(DieState.SettledDown);
             }
         }
 
@@ -38,11 +38,11 @@ namespace _dice_roll.Dice
 
         private void OnMouseDown()
         {
-            ChangeState(DiceState.PickedUp);
+            ChangeState(DieState.PickedUp);
 
             _rigidbody.isKinematic = true;
 
-            _plane = new Plane(Vector3.up, -2f);
+            _plane = new Plane(Vector3.up, -3f);
         }
 
         private void OnMouseDrag()
@@ -65,7 +65,7 @@ namespace _dice_roll.Dice
 
         private void OnMouseUp()
         {
-            ChangeState(DiceState.Thrown);
+            ChangeState(DieState.Thrown);
 
             _rigidbody.isKinematic = false;
 
@@ -81,7 +81,7 @@ namespace _dice_roll.Dice
 
         public void AutoRoll()
         {
-            ChangeState(DiceState.Thrown);
+            ChangeState(DieState.Thrown);
             _rigidbody.AddForce(Vector3.up/10, ForceMode.Impulse);
             _rigidbody.AddTorque(Random.onUnitSphere * 10);
         }

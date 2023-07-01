@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace _dice_roll.Dice
+namespace _dice_roll.Face
 {
     
     public class Face : MonoBehaviour, IFace<int>

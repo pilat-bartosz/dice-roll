@@ -1,53 +1,59 @@
 using System;
-using _dice_roll.Dice;
+using _dice_roll.Die;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-using DiceState = _dice_roll.Dice.Dice.DiceState;
-
-namespace DiceRoll
+namespace _dice_roll
 {
+    /// <summary>
+    /// Dummy class to manage everything
+    /// </summary>
     public class RollManager : MonoBehaviour
     {
-        [SerializeField] private RigidbodyDice _dice;
+        [SerializeField] private RigidbodyDie _die;
         [SerializeField] private DiceRollUI _ui;
 
         private int _lastValue;
         private int _totalValue;
+        
+        /// <summary>
+        /// Plane on which the player's hand will move when grabbing a dice.
+        /// </summary>
+        private Plane _handPlane;
 
         private void Awake()
         {
-            Assert.IsNotNull(_dice, "Missing dice reference");
+            Assert.IsNotNull(_die, "Missing dice reference");
             Assert.IsNotNull(_ui, "Missing ui reference");
         
             //Initialize gui values
             _ui.UpdateValues(-1, _totalValue);
 
-            _dice.OnStateChange += OnDiceStateChange;
+            _die.OnStateChange += OnDiceStateChange;
         }
 
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                _dice.AutoRoll();
+                _die.AutoRoll();
             }
         }
 
-        private void OnDiceStateChange(Dice.DiceState diceState)
+        private void OnDiceStateChange(Die.Die.DieState dieState)
         {
-            switch (diceState)
+            switch (dieState)
             {
-                case DiceState.PickedUp:
+                case Die.Die.DieState.PickedUp:
                     OnDicePickup();
                     break;
-                case DiceState.Thrown:
+                case Die.Die.DieState.Thrown:
                     break;
-                case DiceState.SettleDown:
+                case Die.Die.DieState.SettledDown:
                     OnDiceSettleDown();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(diceState), diceState, null);
+                    throw new ArgumentOutOfRangeException(nameof(dieState), dieState, null);
             }
         }
 
@@ -58,7 +64,7 @@ namespace DiceRoll
 
         private void OnDiceSettleDown()
         {
-            _lastValue = _dice.CheckValue;
+            _lastValue = _die.CheckValue;
             _totalValue += _lastValue;
             _ui.UpdateValues(_lastValue, _totalValue);
         

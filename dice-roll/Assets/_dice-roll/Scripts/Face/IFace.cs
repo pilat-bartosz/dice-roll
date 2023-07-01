@@ -1,4 +1,4 @@
-﻿namespace _dice_roll.Dice
+﻿namespace _dice_roll.Face
 {
     public interface IFace<T>
     {

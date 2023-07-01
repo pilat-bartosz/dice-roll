@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace _dice_roll.Dice
+namespace _dice_roll.Die
 {
-    public class Dice : MonoBehaviour, IDice
+    public class Die : MonoBehaviour, IDie
     {
-        protected DiceState CurrentState;
+        protected DieState CurrentState;
         
-        [SerializeField] private List<Face> _faces;
+        [SerializeField] private List<Face.Face> _faces;
         
-        public Action<DiceState> OnStateChange;
+        public Action<DieState> OnStateChange;
         
-        public enum DiceState
+        public enum DieState
         {
             PickedUp,
             Thrown,
-            SettleDown
+            SettledDown
         }
         
         private void Awake()
@@ -26,7 +26,7 @@ namespace _dice_roll.Dice
             Assert.IsTrue(_faces.Count > 0, "Dice should have faces");
         }
         
-        protected void ChangeState(DiceState newState)
+        protected void ChangeState(DieState newState)
         {
             CurrentState = newState;
             OnStateChange?.Invoke(newState);
@@ -36,7 +36,7 @@ namespace _dice_roll.Dice
         {
             get
             {
-                if (CurrentState != DiceState.SettleDown) return -1;
+                if (CurrentState != DieState.SettledDown) return -1;
                 
                 var value = 0;
                 var bestMatch = float.MinValue;

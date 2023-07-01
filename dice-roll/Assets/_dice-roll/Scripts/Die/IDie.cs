@@ -1,6 +1,6 @@
-﻿namespace _dice_roll.Dice
+﻿namespace _dice_roll.Die
 {
-    public interface IDice
+    public interface IDie
     {
         /// <summary>
         /// Returns a value of the face that "face up" the best.
