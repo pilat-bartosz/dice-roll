@@ -7,37 +7,38 @@ namespace _dice_roll.Die
 {
     public class Die : MonoBehaviour, IDie
     {
-        protected DieState CurrentState;
-        
+        public DieState CurrentState { get; private set; }
+
         [SerializeField] private List<Face.Face> _faces;
-        
+
         public Action<DieState> OnStateChange;
-        
+
         public enum DieState
         {
             PickedUp,
             Thrown,
-            SettledDown
+            SettledDown,
+            Aborted
         }
-        
+
         private void Awake()
         {
             Assert.IsNotNull(_faces, "shouldn't be null");
             Assert.IsTrue(_faces.Count > 0, "Dice should have faces");
         }
-        
+
         protected void ChangeState(DieState newState)
         {
             CurrentState = newState;
             OnStateChange?.Invoke(newState);
         }
-        
+
         public int CheckValue
         {
             get
             {
                 if (CurrentState != DieState.SettledDown) return -1;
-                
+
                 var value = 0;
                 var bestMatch = float.MinValue;
 

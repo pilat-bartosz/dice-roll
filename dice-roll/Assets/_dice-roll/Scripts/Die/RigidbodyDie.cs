@@ -2,13 +2,14 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
 
-//TODO split into Dice and Rigidbody dice
-//TODO add drag and release
 namespace _dice_roll.Die
 {
     [RequireComponent(typeof(Rigidbody))]
     public class RigidbodyDie : Die
     {
+        [SerializeField] private float _throwAbortVelocitySqr = 1f;
+        [SerializeField] private float _throwTorqueForceMultiplier = 1f;
+
         private Rigidbody _rigidbody;
 
         private void Awake()
@@ -32,57 +33,40 @@ namespace _dice_roll.Die
             }
         }
 
-
-        //TODO move to external source
-        private Plane _plane;
-
-        private void OnMouseDown()
+        public void Grab()
         {
             ChangeState(DieState.PickedUp);
 
             _rigidbody.isKinematic = true;
-
-            _plane = new Plane(Vector3.up, -3f);
         }
 
-        private void OnMouseDrag()
+        public void UpdatePosition(Vector3 newPoint)
         {
-            var ray = Camera.main.ScreenPointToRay(
-                new Vector3(
-                    Input.mousePosition.x,
-                    Input.mousePosition.y,
-                    0f)
-            );
-
-            if (_plane.Raycast(ray, out var newZ))
-            {
-                var newPoint = ray.GetPoint(newZ);
-
-
-                _rigidbody.MovePosition(newPoint);
-            }
+            _rigidbody.MovePosition(newPoint);
         }
 
-        private void OnMouseUp()
+        public void Release()
         {
             ChangeState(DieState.Thrown);
 
             _rigidbody.isKinematic = false;
-
-            //Add random torque when velocity is small enough
-            //this is to simulate rolling a dice in place instead throwing it across 
-            //this also prevents picking up and placing it again with same value
-            _rigidbody.AddRelativeTorque(
-                _rigidbody.velocity.sqrMagnitude > 1f
-                    ? _rigidbody.velocity
-                    : Random.onUnitSphere * 10
-            );
+            
+            //Abort throw when velocity is too small
+            if (_rigidbody.velocity.sqrMagnitude > _throwAbortVelocitySqr)
+            {
+                _rigidbody.AddRelativeTorque(_rigidbody.velocity * _throwTorqueForceMultiplier);
+            }
+            else
+            {
+                ChangeState(DieState.Aborted);
+            }
         }
 
+        //Testing purpose only
         public void AutoRoll()
         {
             ChangeState(DieState.Thrown);
-            _rigidbody.AddForce(Vector3.up/10, ForceMode.Impulse);
+            _rigidbody.AddForce(Vector3.up / 10, ForceMode.Impulse);
             _rigidbody.AddTorque(Random.onUnitSphere * 10);
         }
     }
