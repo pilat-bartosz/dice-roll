@@ -1,95 +1,60 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-using Random = UnityEngine.Random;
 
-//TODO split into Dice and Rigidbody dice
-//TODO add drag and release
-namespace DiceRoll
+namespace _dice_roll.Dice
 {
-    public enum DiceState
+    public class Dice : MonoBehaviour, IDice
     {
-        PickedUp,
-        SettleDown
-    }
-    
-    public class Dice : MonoBehaviour
-    {
-        private Rigidbody _rigidbody;
-
-        [SerializeField] private List<TMPFace> _faces;
-
-        private bool _itWasThrown;
+        protected DiceState CurrentState;
+        
+        [SerializeField] private List<Face> _faces;
         
         public Action<DiceState> OnStateChange;
-
+        
+        public enum DiceState
+        {
+            PickedUp,
+            Thrown,
+            SettleDown
+        }
+        
         private void Awake()
         {
             Assert.IsNotNull(_faces, "shouldn't be null");
             Assert.IsTrue(_faces.Count > 0, "Dice should have faces");
-
-            _rigidbody = GetComponent<Rigidbody>();
-
-            Assert.IsNotNull(_rigidbody, "shouldn't be null");
         }
-
-        private void Start()
+        
+        protected void ChangeState(DiceState newState)
         {
-            //auto roll 
-            AutoRoll();
+            CurrentState = newState;
+            OnStateChange?.Invoke(newState);
         }
-
-        private void Update()
+        
+        public int CheckValue
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            get
             {
-                AutoRoll();
-            }
-            if (_itWasThrown && _rigidbody.IsSleeping())
-            {
-                _itWasThrown = false;
-                OnStateChange?.Invoke(DiceState.SettleDown);
-            }
-        }
+                if (CurrentState != DiceState.SettleDown) return -1;
+                
+                var value = 0;
+                var bestMatch = float.MinValue;
 
-
-        /// <summary>
-        /// Returns a value of the face that "face up" the best.
-        /// </summary>
-        /// <returns>Value of the face</returns>
-        public int CheckValue()
-        {
-            var value = 0;
-            var bestMatch = float.MinValue;
-
-            foreach (var face in _faces)
-            {
-                var dot = Vector3.Dot(Vector3.up, face.FaceDirection);
-
-                //1 is max and best value
-                if (dot > bestMatch)
+                foreach (var face in _faces)
                 {
-                    value = face.Value;
-                    bestMatch = dot;
+                    var dot = Vector3.Dot(Vector3.up, face.FaceDirection);
+
+                    //1 is max and best value in this case
+                    if (dot > bestMatch)
+                    {
+                        value = face.Value;
+                        bestMatch = dot;
+                    }
                 }
+
+                return value;
             }
-
-            return value;
-        }
-
-        //TODO remove
-        private void OnMouseDown()
-        {
-            AutoRoll();
-        }
-
-        private void AutoRoll()
-        {
-            OnStateChange?.Invoke(DiceState.PickedUp);
-            _itWasThrown = true;
-            _rigidbody.AddForce(Vector3.up, ForceMode.Impulse);
-            _rigidbody.AddTorque(Random.onUnitSphere*10);
         }
     }
 }

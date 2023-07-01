@@ -1,7 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 
-namespace DiceRoll
+namespace _dice_roll.Dice
 {
     [RequireComponent(typeof(TextMeshPro))]
     public class TMPFace : Face
