@@ -817,6 +817,11 @@ MonoBehaviour:
   - {fileID: 2118349741383039297}
   - {fileID: 5834598038762822883}
   - {fileID: 2769735639727742955}
+  _autoRollOnStart: 1
+  _throwAbortVelocitySqr: 1
+  _throwTorqueForceMultiplier: 1
+  _autoRollUpForce: 0.3
+  _autoRollTorqueForce: 10
 --- !u!33 &6457270728664087571
 MeshFilter:
   m_ObjectHideFlags: 0

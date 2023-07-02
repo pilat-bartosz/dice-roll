@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
@@ -8,8 +7,15 @@ namespace _dice_roll.Die
     [RequireComponent(typeof(Rigidbody))]
     public class RigidbodyDie : Die, IPickable
     {
+        [Header("Die settings")] [SerializeField]
+        private bool _autoRollOnStart = true;
+
         [SerializeField] private float _throwAbortVelocitySqr = 1f;
         [SerializeField] private float _throwTorqueForceMultiplier = 1f;
+
+        [Header("Auto-roll settings")] 
+        [SerializeField] private float _autoRollUpForce = 0.1f;
+        [SerializeField] private float _autoRollTorqueForce = 10f;
 
         private Rigidbody _rigidbody;
 
@@ -24,8 +30,10 @@ namespace _dice_roll.Die
 
         private void Start()
         {
-            //auto roll on start for randomness
-            AutoRoll();
+            if (_autoRollOnStart)
+            {
+                AutoRoll();
+            }
         }
 
         private void FixedUpdate()
@@ -49,7 +57,7 @@ namespace _dice_roll.Die
             ChangeState(DieState.PickedUp);
 
             _rigidbody.isKinematic = true;
-            
+
             //Reset target position to prevent flickering/uncontrollable jumps
             _dragToPosition = _rigidbody.position;
         }
@@ -64,7 +72,7 @@ namespace _dice_roll.Die
             ChangeState(DieState.Thrown);
 
             _rigidbody.isKinematic = false;
-            
+
             //Abort throw when velocity is too small
             if (_rigidbody.velocity.sqrMagnitude > _throwAbortVelocitySqr)
             {
@@ -76,12 +84,14 @@ namespace _dice_roll.Die
             }
         }
 
-        //Testing purpose only
         public void AutoRoll()
         {
-            ChangeState(DieState.Thrown);
-            _rigidbody.AddForce(Vector3.up / 10, ForceMode.Impulse);
-            _rigidbody.AddTorque(Random.onUnitSphere * 10);
+            if (CurrentState is DieState.SettledDown or DieState.Aborted)
+            {
+                ChangeState(DieState.Thrown);
+                _rigidbody.AddForce(Vector3.up * _autoRollUpForce, ForceMode.Impulse);
+                _rigidbody.AddRelativeTorque(Random.onUnitSphere * _autoRollTorqueForce, ForceMode.Impulse);
+            }
         }
     }
 }

@@ -7,8 +7,9 @@ namespace _dice_roll.Die
 {
     public class Die : MonoBehaviour, IDie
     {
-        public DieState CurrentState { get; private set; }
+        public DieState CurrentState { get; private set; } = DieState.Aborted;
 
+        [Header("Die faces settings")]
         [SerializeField] private List<Face.Face> _faces;
 
         public Action<DieState> OnStateChange;

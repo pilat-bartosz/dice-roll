@@ -29,7 +29,7 @@ namespace _dice_roll
             Assert.IsNotNull(_ui, "Missing ui reference");
 
             //Initialize gui values
-            _ui.Initialize(FaceSpecialValue);
+            _ui.Initialize(FaceSpecialValue, _die.AutoRoll);
 
             _die.OnStateChange += OnDieStateChange;
 
@@ -44,7 +44,7 @@ namespace _dice_roll
             }
             
             //Testing purpose only
-            if (Input.GetKeyDown(KeyCode.Space) && _die.CurrentState == DieState.SettledDown)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 _die.AutoRoll();
             }
