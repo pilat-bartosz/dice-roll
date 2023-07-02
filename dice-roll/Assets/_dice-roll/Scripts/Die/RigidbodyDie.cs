@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
@@ -5,12 +6,14 @@ using Random = UnityEngine.Random;
 namespace _dice_roll.Die
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class RigidbodyDie : Die
+    public class RigidbodyDie : Die, IPickable
     {
         [SerializeField] private float _throwAbortVelocitySqr = 1f;
         [SerializeField] private float _throwTorqueForceMultiplier = 1f;
 
         private Rigidbody _rigidbody;
+
+        private Vector3 _dragToPosition;
 
         private void Awake()
         {
@@ -25,6 +28,14 @@ namespace _dice_roll.Die
             AutoRoll();
         }
 
+        private void FixedUpdate()
+        {
+            if (CurrentState == DieState.PickedUp)
+            {
+                _rigidbody.MovePosition(_dragToPosition);
+            }
+        }
+
         private void Update()
         {
             if (CurrentState == DieState.Thrown && _rigidbody.IsSleeping())
@@ -33,19 +44,22 @@ namespace _dice_roll.Die
             }
         }
 
-        public void Grab()
+        public void PickUp()
         {
             ChangeState(DieState.PickedUp);
 
             _rigidbody.isKinematic = true;
+            
+            //Reset target position to prevent flickering/uncontrollable jumps
+            _dragToPosition = _rigidbody.position;
         }
 
-        public void UpdatePosition(Vector3 newPoint)
+        public void DragTo(Vector3 newPoint)
         {
-            _rigidbody.MovePosition(newPoint);
+            _dragToPosition = newPoint;
         }
 
-        public void Release()
+        public void Drop()
         {
             ChangeState(DieState.Thrown);
 
